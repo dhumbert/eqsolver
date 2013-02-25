@@ -13,6 +13,10 @@ class TestSolver(unittest.TestCase):
         eqs.parse()
         self.assertEqual(len(eqs.output_queue), 7)
 
+        eqs = solver.Solver('4123*10')
+        eqs.parse()
+        self.assertEqual(len(eqs.output_queue), 3)
+
 
 if __name__ == '__main__':
     unittest.main()

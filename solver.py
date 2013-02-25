@@ -36,11 +36,21 @@ class Solver:
         """Parse the equation using the shunting-yard algorithm"""
         # http://en.wikipedia.org/wiki/Shunting-yard_algorithm
         eq = self.equation_string
-        for i in range(0, len(eq)):
+        i = 0
+        while i < len(eq):
             for tok in tokens:
                 if re.match(tokens[tok], eq[i]):
                     if tok == 'NUMBER':
-                        self.output_queue.append(eq[i])
+                        number = str(eq[i])
+                        for nexttok in eq[i + 1:]:
+                            if re.match(tokens[tok], nexttok):
+                                number += nexttok
+                                i += 1  # skip next token
+                            else:
+                                break
+                        self.output_queue.append(number)
+                        i += 1
+                        break
                     else:
                         for si in range(0, len(self.stack) - 1):
                             stack_op = self.stack[si]
@@ -49,6 +59,8 @@ class Solver:
                                 self.stack.popleft()
                                 self.output_queue.append(stack_op)
                         self.stack.appendleft(tok)
+                        i += 1
+                        break
 
         # clean up stack
         for stack_op in self.stack:

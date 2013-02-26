@@ -17,6 +17,10 @@ class TestSolver(unittest.TestCase):
         eqs.parse()
         self.assertEqual(len(eqs.output_queue), 3)
 
+        eqs = solver.Solver('(2 + 3) * 2')
+        eqs.parse()
+        self.assertEqual(len(eqs.output_queue), 5)
+
 
 if __name__ == '__main__':
     unittest.main()

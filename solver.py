@@ -51,6 +51,17 @@ class Solver:
                         self.output_queue.append(number)
                         i += 1
                         break
+                    elif tok == 'LPAREN':
+                        stack.appendleft(tok)
+                        i += 1
+                        break
+                    elif tok == 'RPAREN':
+                        stack_op = stack.popleft()
+                        while stack_op != 'LPAREN':
+                            self.output_queue.append(stack_op)
+                            stack_op = stack.popleft()
+                        i += 1
+                        break
                     else:
                         for si in range(0, len(stack) - 1):
                             stack_op = stack[si]

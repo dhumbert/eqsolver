@@ -114,6 +114,7 @@ class Solver:
                     self.output_queue.append(stack.popleft())
                 stack.appendleft(op_id)
             elif self.is_number(token):
+                # peek ahead to see if it's a multi-digit number
                 while self.has_tokens():
                     if self.is_number(self.peek()):
                         token += self.next_token()

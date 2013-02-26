@@ -30,7 +30,41 @@ class Solver:
         self.output_queue = collections.deque()
 
     def solve(self):
-        pass
+        if len(self.output_queue) == 0:
+            self.tokenize();
+
+        value = 0
+        operands = []
+        for token in self.output_queue:
+            if self.is_number(token):
+                operands.append(token)
+            elif self.is_op_id(token):
+                operands, value = self.evaluate(token, operands)
+                operands.append(value)
+            else:
+                raise ParseError("Invalid token:", token)
+
+        return operands[0]
+
+    def evaluate(self, op_id, operands):
+        return {
+            'TIMES': self.evaluate_multiply(operands),
+            'DIVIDE': self.evaluate_divide(operands),
+            'PLUS': self.evaluate_add(operands),
+            'MINUS': self.evaluate_subtract(operands),
+        }[op_id]
+
+    def evaluate_add(self, operands):
+        return (operands[:-2], float(operands[-2]) + float(operands[-1]))
+
+    def evaluate_subtract(self, operands):
+        return (operands[:-2], float(operands[-2]) - float(operands[-1]))
+
+    def evaluate_multiply(self, operands):
+        return (operands[:-2], float(operands[-2]) * float(operands[-1]))
+
+    def evaluate_divide(self, operands):
+        return (operands[:-2], float(operands[-2]) / float(operands[-1]))
 
     def is_op(self, token):
         return token in tokens

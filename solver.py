@@ -2,14 +2,11 @@ import re
 import collections
 
 tokens = {
-    'NUMBER': '\d',
-    'PLUS': '\+',
-    'MINUS': '\-',
-    'TIMES': '\*',
-    'DIVIDE': '/',
-    'EQUALS': '=',
-    'LPAREN': '\(',
-    'RPAREN': '\)',
+    '+': 'PLUS',
+    '-': 'MINUS',
+    '*': 'TIMES',
+    '/': 'DIVIDE',
+    '=': 'EQUALS',
 }
 
 precedence = {
@@ -23,55 +20,108 @@ precedence = {
 left_assoc = ('PLUS', 'MINUS', 'TIMES', 'DIVIDE')
 
 
+class ParseError(Exception):
+    pass
+
+
 class Solver:
     def __init__(self, equation_string):
-        self.equation_string = equation_string.replace(" ", "")
+        self.equation = equation_string.replace(" ", "")
         self.output_queue = collections.deque()
 
     def solve(self):
-        self.parse()
+        pass
 
-    def parse(self):
+    def is_op(self, token):
+        return token in tokens
+
+    def is_op_id(self, token):
+        return token in tokens.values()
+
+    def is_left_paren(self, token):
+        return token == '('
+
+    def is_right_paren(self, token):
+        return token == ')'
+
+    def is_number(self, token):
+        return token.isdigit()
+
+    def op_id(self, token):
+        try:
+            return tokens[token]
+        except IndexError:
+            raise ParseError("Invalid operator")
+
+    def precedence(self, token):
+        return precedence[token]
+
+    def left_assoc(self, token):
+        return token in left_assoc
+
+    def has_tokens(self):
+        return len(self.equation) > 0
+
+    def next_token(self):
+        next = self.equation[0]
+        self.equation = self.equation[1:]
+        return next
+
+    def peek(self):
+        return self.equation[0]
+
+    def iterate_stack(self, stack, current_op_id):
+        # while there is an operator token, o2, at the top of the stack, and
+        # either o1 is left-associative and its precedence is
+        # less than or equal to that of o2,
+        # or o1 has precedence less than that of o2,
+        while (
+                len(stack) > 0
+                and self.is_op_id(stack[0])
+                and (
+                    (
+                        self.left_assoc(current_op_id)
+                        and self.precedence(current_op_id)
+                            <= self.precedence(stack[0])
+                    )
+                    or (
+                        self.precedence(current_op_id)
+                            < self.precedence(stack[0])
+                    )
+                )
+            ):
+            yield  # pass control back to pop off the stack
+
+    def tokenize(self):
         """Parse the equation using the shunting-yard algorithm"""
         # http://en.wikipedia.org/wiki/Shunting-yard_algorithm
-        eq = self.equation_string
         stack = collections.deque()
-        i = 0
-        while i < len(eq):
-            for tok in tokens:
-                if re.match(tokens[tok], eq[i]):
-                    if tok == 'NUMBER':
-                        number = str(eq[i])
-                        for nexttok in eq[i + 1:]:
-                            if re.match(tokens[tok], nexttok):
-                                number += nexttok
-                                i += 1  # skip next token
-                            else:
-                                break
-                        self.output_queue.append(number)
-                        i += 1
-                        break
-                    elif tok == 'LPAREN':
-                        stack.appendleft(tok)
-                        i += 1
-                        break
-                    elif tok == 'RPAREN':
-                        stack_op = stack.popleft()
-                        while stack_op != 'LPAREN':
-                            self.output_queue.append(stack_op)
-                            stack_op = stack.popleft()
-                        i += 1
-                        break
+
+        while self.has_tokens():
+            token = self.next_token()
+
+            if self.is_left_paren(token):
+                stack.appendleft('LPAREN')
+            elif self.is_right_paren(token):
+                stack_op = stack.popleft()
+                while stack_op != 'LPAREN':
+                    self.output_queue.append(stack_op)
+                    stack_op = stack.popleft()
+            elif self.is_op(token):
+                op_id = self.op_id(token)
+
+                for _ in self.iterate_stack(stack, op_id):
+                    self.output_queue.append(stack.popleft())
+                stack.appendleft(op_id)
+            elif self.is_number(token):
+                while self.has_tokens():
+                    if self.is_number(self.peek()):
+                        token += self.next_token()
                     else:
-                        for si in range(0, len(stack) - 1):
-                            stack_op = stack[si]
-                            if (precedence[tok] < precedence[stack_op] 
-                                or (tok in left_assoc and precedence[tok] == precedence[stack_op])):
-                                stack.popleft()
-                                self.output_queue.append(stack_op)
-                        stack.appendleft(tok)
-                        i += 1
                         break
+                self.output_queue.append(token)
+            else:
+                raise ParseError("Invalid token: %s" % token)
 
         # clean up stack
         for stack_op in stack:

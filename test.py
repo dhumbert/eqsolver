@@ -9,6 +9,10 @@ class TestSolver(unittest.TestCase):
         eqs.tokenize()
         self.assertEqual(list(eqs.output_queue), ['4', '3', 'PLUS'])
 
+        eqs = solver.Solver('4.5+3')
+        eqs.tokenize()
+        self.assertEqual(list(eqs.output_queue), ['4.5', '3', 'PLUS'])
+
         eqs = solver.Solver('4+3*5-2')
         eqs.tokenize()
         self.assertEqual(list(eqs.output_queue), ['4', '3', '5', 'TIMES', 'PLUS', '2', 'MINUS'])
@@ -24,6 +28,9 @@ class TestSolver(unittest.TestCase):
     def test_solve(self):
         eqs = solver.Solver('4+3')
         self.assertEqual(7, eqs.solve())
+
+        eqs = solver.Solver('4.5+3')
+        self.assertEqual(7.5, eqs.solve())
 
         eqs = solver.Solver('4+3*5-2')
         self.assertEqual(17, eqs.solve())

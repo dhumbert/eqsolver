@@ -41,7 +41,7 @@ class Solver:
                 operands, value = self.evaluate(token, operands)
                 operands.append(value)
             else:
-                raise ParseError("Invalid token:", token)
+                raise ParseError("Invalid token: %s" % token)
 
         return operands[0]
 
@@ -78,7 +78,14 @@ class Solver:
         return token == ')'
 
     def is_number(self, token):
-        return token.isdigit()
+        try:
+            float(token)
+            return True
+        except ValueError:
+            return False
+
+    def is_digit(self, token):
+        return token.isdigit() or token == '.'
 
     def op_id(self, token):
         try:
@@ -146,10 +153,10 @@ class Solver:
                 for _ in self.iterate_stack(stack, op_id):
                     self.output_queue.append(stack.popleft())
                 stack.appendleft(op_id)
-            elif self.is_number(token):
+            elif self.is_digit(token):
                 # peek ahead to see if it's a multi-digit number
                 while self.has_tokens():
-                    if self.is_number(self.peek()):
+                    if self.is_digit(self.peek()):
                         token += self.next_token()
                     else:
                         break

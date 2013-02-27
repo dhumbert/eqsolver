@@ -1,8 +1,8 @@
 import unittest
-import solver
+import solver.shunting as solver
 
 
-class TestSolver(unittest.TestCase):
+class TestShuntingSolver(unittest.TestCase):
     """ Test the tokenizer. Pretty white-box, but parsing is new to me"""
     def test_tokenize(self):
         eqs = solver.Solver('4+3')

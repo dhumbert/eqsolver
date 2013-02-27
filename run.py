@@ -1,6 +1,6 @@
 import argparse
 import sys
-import solver
+from solver import shunting as solver
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -29,3 +29,4 @@ if __name__ == "__main__":
 
     equation_solver = solver.Solver(equation)
     result = equation_solver.solve()
+    print("Result: %s" % result)

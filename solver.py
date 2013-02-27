@@ -26,11 +26,11 @@ class ParseError(Exception):
 class Solver:
     def __init__(self, equation_string):
         self.equation = equation_string.replace(" ", "")
-        self.output_queue = collections.deque()
+        self.output_queue = []
 
     def solve(self):
         if len(self.output_queue) == 0:
-            self.tokenize();
+            self.tokenize()
 
         value = 0
         operands = []
